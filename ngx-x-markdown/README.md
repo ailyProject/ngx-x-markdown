@@ -201,11 +201,16 @@ $$
 
 > 注意：使用 LaTeX 需要额外安装 `katex` 并引入样式 `katex/dist/katex.min.css`
 
-### 6. Mermaid 图表
+### 6. Mermaid 图表（推荐：自定义 Code 组件方案）
+
+使用 `MermaidCodeComponent` 可实现流式友好的 Mermaid 渲染：
+- 代码块未闭合时显示"正在生成图表…"占位符
+- 闭合后一次性调用 `mermaid.render()` 生成 SVG
+- 非 mermaid 代码块正常渲染
 
 ```typescript
-import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
-import { XMarkdownComponent, Mermaid, renderMermaidDiagrams } from 'ngx-x-markdown';
+import { Component, OnInit } from '@angular/core';
+import { XMarkdownComponent, MermaidCodeComponent } from 'ngx-x-markdown';
 import mermaid from 'mermaid';
 
 @Component({
@@ -214,21 +219,14 @@ import mermaid from 'mermaid';
   imports: [XMarkdownComponent],
   template: `
     <x-markdown
-      #mdContainer
       [content]="md"
-      [config]="markedConfig"
+      [streaming]="{ enable: true }"
+      [components]="componentMap"
       rootClassName="x-markdown-light" />
   `,
 })
-export class DiagramComponent implements AfterViewChecked {
-  @ViewChild('mdContainer', { read: ElementRef }) containerRef!: ElementRef;
-
-  markedConfig = {
-    extensions: Mermaid({
-      mermaidInstance: mermaid,
-      mermaidConfig: { theme: 'default' },
-    }),
-  };
+export class DiagramComponent implements OnInit {
+  componentMap = { code: MermaidCodeComponent };
 
   md = `
 \`\`\`mermaid
@@ -239,15 +237,19 @@ graph TD
 \`\`\`
   `;
 
-  ngAfterViewChecked(): void {
-    if (this.containerRef) {
-      renderMermaidDiagrams(mermaid, this.containerRef.nativeElement);
-    }
+  ngOnInit(): void {
+    // 全局初始化一次 mermaid 实例
+    MermaidCodeComponent.setMermaidInstance(mermaid, { theme: 'default' });
   }
 }
 ```
 
 > 注意：使用 Mermaid 需要安装 `mermaid`：`npm install mermaid`
+
+#### 备选方案：Mermaid 插件
+
+如果不需要流式占位符（如纯静态内容），也可使用 `Mermaid()` marked 插件 + `renderMermaidDiagrams()`。
+详见 `examples/mermaid-example.component.ts`。
 
 ## API
 

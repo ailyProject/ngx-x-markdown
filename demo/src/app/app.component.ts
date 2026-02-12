@@ -1,6 +1,6 @@
-import { Component, OnDestroy, AfterViewChecked, ElementRef, ViewChild, signal, computed } from '@angular/core';
-import { XMarkdownComponent, Mermaid, renderMermaidDiagrams } from 'ngx-x-markdown';
-import type { StreamingOption } from 'ngx-x-markdown';
+import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
+import { XMarkdownComponent, MermaidCodeComponent } from 'ngx-x-markdown';
+import type { StreamingOption, ComponentMap } from 'ngx-x-markdown';
 import mermaid from 'mermaid';
 
 @Component({
@@ -10,8 +10,7 @@ import mermaid from 'mermaid';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent implements OnDestroy, AfterViewChecked {
-  @ViewChild('mdContainer', { read: ElementRef }) mdContainerRef?: ElementRef<HTMLElement>;
+export class AppComponent implements OnInit, OnDestroy {
   // ========== State ==========
   theme = signal<'light' | 'dark'>('light');
   streamContent = signal('');
@@ -40,21 +39,17 @@ export class AppComponent implements OnDestroy, AfterViewChecked {
     { label: '📊 技术文档', value: TECH_DOC_CONTENT },
     { label: '💻 代码讲解', value: CODE_TUTORIAL_CONTENT },
     { label: '📈 Mermaid 图表', value: MERMAID_CONTENT },
+    { label: '🖼️ 图片渲染', value: IMAGE_CONTENT },
   ];
 
-  /** Mermaid marked 扩展配置 */
-  mermaidConfig = {
-    extensions: Mermaid({
-      mermaidInstance: mermaid,
-      mermaidConfig: { startOnLoad: false },
-    }),
-  };
+  /** Mermaid 自定义组件映射 */
+  mermaidComponentMap: ComponentMap = { code: MermaidCodeComponent };
 
   /** 当前是否为 Mermaid demo */
   isMermaidDemo = computed(() => this.selectedDemo() === 3);
 
-  /** 根据当前 demo 返回 marked config */
-  currentMarkedConfig = computed(() => this.isMermaidDemo() ? this.mermaidConfig : undefined);
+  /** 根据当前 demo 返回自定义组件映射 */
+  currentComponentMap = computed(() => this.isMermaidDemo() ? this.mermaidComponentMap : undefined);
 
   selectedDemo = signal(0);
 
@@ -102,11 +97,9 @@ export class AppComponent implements OnDestroy, AfterViewChecked {
     this.streamingConfig.set({ ...this.streamingConfig(), hasNextChunk: false });
   }
 
-  ngAfterViewChecked(): void {
-    // Mermaid demo 选中时，渲染 mermaid 图表
-    if (this.isMermaidDemo() && this.mdContainerRef) {
-      renderMermaidDiagrams(mermaid, this.mdContainerRef.nativeElement);
-    }
+  ngOnInit(): void {
+    // 全局初始化一次 mermaid 实例
+    MermaidCodeComponent.setMermaidInstance(mermaid, { theme: 'default' });
   }
 
   ngOnDestroy(): void {
@@ -440,4 +433,71 @@ pie title ngx-x-markdown 核心模块
 \`\`\`
 
 > 💡 **提示**：Mermaid 图表支持流式渲染——当图表代码块尚未完整时，会在完成后自动渲染。
+`;
+
+const IMAGE_CONTENT = `# 🖼️ 图片渲染示例
+
+ngx-x-markdown 完整支持 Markdown 图片语法，包括行内图片、带标题图片等多种格式。
+
+## 基本图片
+
+使用标准 Markdown 语法插入图片：
+
+![Mountain Landscape](https://picsum.photos/seed/mountain/800/400)
+
+## 带标题的图片
+
+图片可以附带标题文本（鼠标悬停可见）：
+
+![Ocean View](https://picsum.photos/seed/ocean/800/400 "美丽的海景")
+
+## 图文混排
+
+在段落中嵌入行内图片可以丰富内容表现力。图片天然支持与周围文本混排：
+
+以下是一些技术架构中常见的图标示例，在实际项目文档中经常需要使用小尺寸图片 ![icon](https://picsum.photos/seed/icon1/20/20) 来增强可读性。
+
+## 图片列表
+
+使用列表组织多张图片：
+
+- **自然风光**
+  ![Nature](https://picsum.photos/seed/nature/600/300)
+
+- **城市建筑**
+  ![City](https://picsum.photos/seed/city/600/300)
+
+- **抽象艺术**
+  ![Abstract](https://picsum.photos/seed/abstract/600/300)
+
+## 图片表格
+
+在表格中展示图片非常适合做对比：
+
+| 类别 | 预览 | 说明 |
+|------|------|------|
+| 风景 | ![landscape](https://picsum.photos/seed/land/150/100) | 自然风景照片 |
+| 动物 | ![animals](https://picsum.photos/seed/animal/150/100) | 野生动物摄影 |
+| 美食 | ![food](https://picsum.photos/seed/food/150/100) | 美食摄影 |
+
+## 图片链接
+
+图片也可以作为链接的内容，点击图片跳转到目标页面：
+
+[![GitHub](https://picsum.photos/seed/github/800/200)](https://github.com)
+
+## 在代码中使用
+
+\`\`\`html
+<!-- 基本图片 -->
+![描述文字](图片地址)
+
+<!-- 带标题的图片 -->
+![描述文字](图片地址 "悬停标题")
+
+<!-- 图片链接 -->
+[![描述文字](图片地址)](链接地址)
+\`\`\`
+
+> 💡 **提示**：在流式渲染模式下，图片会在 URL 解析完成后自动加载，不会因为后续内容未完成而影响已识别图片的展示。
 `;

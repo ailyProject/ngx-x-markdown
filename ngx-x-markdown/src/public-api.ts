@@ -1,6 +1,7 @@
 // Components
 export { XMarkdownComponent } from './lib/components/x-markdown/x-markdown.component';
 export { AnimationTextComponent } from './lib/components/animation-text/animation-text.component';
+export { MermaidCodeComponent } from './lib/components/mermaid-code/mermaid-code.component';
 
 // Core
 export { MarkdownParser } from './lib/core/parser';
@@ -30,5 +31,5 @@ export { StreamCacheTokenType } from './lib/interfaces';
 // Plugins
 export { Latex } from './lib/plugins';
 export type { LatexOption } from './lib/plugins';
-export { Mermaid, renderMermaidDiagrams } from './lib/plugins';
+export { Mermaid, renderMermaidDiagrams, clearMermaidCache } from './lib/plugins';
 export type { MermaidOption } from './lib/plugins';

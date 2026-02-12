@@ -67,10 +67,9 @@
     <div class="preview-content" [class.dark]="theme() === 'dark'">
       @if (streamContent()) {
         <x-markdown
-          #mdContainer
           [content]="streamContent()"
           [streaming]="streamingConfig()"
-          [config]="currentMarkedConfig()"
+          [components]="currentComponentMap()"
           [rootClassName]="themeClass()">
         </x-markdown>
       } @else {
