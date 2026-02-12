@@ -1,0 +1,85 @@
+<!-- Header -->
+<header class="app-header" [class.dark]="theme() === 'dark'">
+  <div class="header-left">
+    <h1 class="app-title">ngx-x-markdown</h1>
+    <span class="app-subtitle">流式 Markdown 渲染演示</span>
+  </div>
+  <div class="header-right">
+    <button class="theme-btn" (click)="toggleTheme()">
+      {{ theme() === 'light' ? ' 暗色' : ' 亮色' }}
+    </button>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="app-main" [class.dark]="theme() === 'dark'">
+
+  <!-- Sidebar Controls -->
+  <aside class="sidebar" [class.dark]="theme() === 'dark'">
+    <section class="control-section">
+      <h3 class="section-title"> 选择内容</h3>
+      <div class="demo-list">
+        @for (demo of demoContents; track $index) {
+          <button
+            class="demo-item"
+            [class.active]="selectedDemo() === $index"
+            (click)="selectDemo($index)">
+            {{ demo.label }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="control-section">
+      <h3 class="section-title"> 输出速度</h3>
+      <div class="speed-group">
+        <button class="speed-btn" [class.active]="speed() === 'slow'" (click)="setSpeed('slow')">慢速</button>
+        <button class="speed-btn" [class.active]="speed() === 'normal'" (click)="setSpeed('normal')">正常</button>
+        <button class="speed-btn" [class.active]="speed() === 'fast'" (click)="setSpeed('fast')">快速</button>
+      </div>
+    </section>
+
+    <section class="control-section">
+      <h3 class="section-title"> 操作</h3>
+      <div class="action-group">
+        <button class="action-btn primary" (click)="startStreaming()" [disabled]="isStreaming()">
+          {{ isStreaming() ? ' 输出中...' : ' 开始流式输出' }}
+        </button>
+        <button class="action-btn" (click)="reset()"> 重置</button>
+      </div>
+    </section>
+
+    <section class="control-section status-section">
+      <div class="status-indicator">
+        <span class="status-dot" [class.active]="isStreaming()"></span>
+        <span>{{ isStreaming() ? '正在流式输出...' : '就绪' }}</span>
+      </div>
+      <div class="char-count">已输出: {{ streamContent().length }} 字符</div>
+    </section>
+  </aside>
+
+  <!-- Markdown Preview Area -->
+  <section class="preview-area" [class.dark]="theme() === 'dark'">
+    <div class="preview-header">
+      <span class="preview-label">Markdown 预览</span>
+      <span class="preview-theme-badge">{{ themeClass() }}</span>
+    </div>
+    <div class="preview-content" [class.dark]="theme() === 'dark'">
+      @if (streamContent()) {
+        <x-markdown
+          #mdContainer
+          [content]="streamContent()"
+          [streaming]="streamingConfig()"
+          [config]="currentMarkedConfig()"
+          [rootClassName]="themeClass()">
+        </x-markdown>
+      } @else {
+        <div class="empty-state">
+          <div class="empty-icon"></div>
+          <p>点击「开始流式输出」查看效果</p>
+        </div>
+      }
+    </div>
+  </section>
+
+</main>

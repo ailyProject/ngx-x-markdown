@@ -1,0 +1,35 @@
+{
+  "name": "@anthropic/ngx-x-markdown",
+  "version": "1.0.0",
+  "description": "Angular port of @ant-design/x-markdown - Markdown renderer with streaming support",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": ">=17.0.0",
+    "@angular/core": ">=17.0.0",
+    "@angular/platform-browser": ">=17.0.0",
+    "marked": ">=9.0.0",
+    "dompurify": ">=3.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "@angular/platform-browser-dynamic": "^19.0.0",
+    "dompurify": "^3.2.4",
+    "katex": "^0.16.0",
+    "marked": "^15.0.0",
+    "ng-packagr": "^19.0.0",
+    "rxjs": "^7.8.0",
+    "typescript": "~5.6.0",
+    "zone.js": "^0.15.0"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json"
+  },
+  "main": "src/public-api.ts",
+  "module": "src/public-api.ts",
+  "typings": "src/public-api.ts"
+}
