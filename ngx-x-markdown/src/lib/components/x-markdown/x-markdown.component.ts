@@ -260,7 +260,8 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
     this._tempPropsMap = new Map<string, Record<string, any>>();
     if (this.components) {
       for (const [tagName] of Object.entries(this.components)) {
-        const elements = temp.querySelectorAll(tagName);
+        const selector = this.getComponentSelector(tagName);
+        const elements = temp.querySelectorAll(selector);
         elements.forEach((el: Element, idx: number) => {
           const fp = this.getElementFingerprint(tagName, el, idx);
           const props = this.extractElementProps(tagName, el);
@@ -320,6 +321,17 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
   private _tempPropsMap: Map<string, Record<string, any>> | null = null;
 
   // ===================== Dynamic Component Injection =====================
+
+  /**
+   * 获取自定义组件的 DOM 选择器。
+   * 对于 code：仅选择块级代码（data-block="true"），行内代码保留原始 HTML 渲染。
+   */
+  private getComponentSelector(tagName: string): string {
+    if (tagName === 'code') {
+      return 'code[data-block="true"]';
+    }
+    return tagName;
+  }
 
   /**
    * 为一个 DOM 元素生成 fingerprint，用于跨渲染周期的组件复用匹配
@@ -436,7 +448,8 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
 
     for (const [tagName, componentClass] of Object.entries(this.components)) {
       if (!componentClass) continue;
-      const elements = container.querySelectorAll(tagName);
+      const selector = this.getComponentSelector(tagName);
+      const elements = container.querySelectorAll(selector);
       const indexOffset = stableCountByTag.get(tagName) || 0;
 
       elements.forEach((element: Element, index: number) => {

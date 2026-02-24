@@ -2,6 +2,14 @@ export const CHAT_COMPONENTS_CONTENT = `# 🧩 自定义组件渲染
 
 ngx-x-markdown 支持通过自定义代码块渲染丰富的 UI 组件。以下展示所有可用的自定义组件类型。
 
+
+## 库依赖
+
+需要安装以下库：
+- \`@aily-project/lib-r4-wifis3\` - WiFi连接
+- \`@aily-project/lib-openweathermap\` - 天气数据
+- \`@aily-project/lib-u8g2\` - SSD1306显示
+
 ## 状态提示 (aily-state)
 
 支持 doing / done / warn / error / info 五种状态，并可带进度条：
