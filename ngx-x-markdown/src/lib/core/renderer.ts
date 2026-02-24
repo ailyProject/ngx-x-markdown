@@ -1,4 +1,10 @@
-import DOMPurify, { Config as DOMPurifyConfig } from 'dompurify';
+import * as DOMPurifyNS from 'dompurify';
+import type { Config as DOMPurifyConfig } from 'dompurify';
+
+// dompurify 使用 export =，ESM 下需兼容 default 或 namespace
+type DOMPurifyInstance = { sanitize: (dirty: string, cfg?: DOMPurifyConfig) => string };
+const DOMPurify: DOMPurifyInstance =
+  (DOMPurifyNS as unknown as { default?: DOMPurifyInstance }).default ?? (DOMPurifyNS as unknown as DOMPurifyInstance);
 import type { ComponentMap, StreamingOption } from '../interfaces';
 
 interface RendererOptions {
@@ -86,7 +92,7 @@ export class MarkdownRenderer {
       const tagLower = tagName.toLowerCase();
       const status = unclosedTags.has(tagLower) ? 'loading' : 'done';
       const regex = new RegExp(`<${tagLower}(\\s|>|/>)`, 'gi');
-      cleanHtml = cleanHtml.replace(regex, (match, after) => {
+      cleanHtml = cleanHtml.replace(regex, (match: string, after: string) => {
         return `<${tagLower} data-stream-status="${status}"${after}`;
       });
     }
