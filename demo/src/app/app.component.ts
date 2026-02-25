@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed, ChangeDetectorRef, inject } from '@angular/core';
 import { XMarkdownComponent, MermaidCodeComponent } from 'ngx-x-markdown';
 import type { StreamingOption, ComponentMap } from 'ngx-x-markdown';
 import mermaid from 'mermaid';
@@ -104,6 +104,27 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isStreaming.set(true);
     this.streamingConfig.set({ ...this.streamingConfig(), hasNextChunk: true });
     this.runStream(this.getCurrentFullContent());
+  }
+
+  /** 非流式直接追加当前 demo 的完整内容 */
+  appendContent(): void {
+    const current = this.streamContent();
+    const toAppend = this.getCurrentFullContent();
+    const separator = current && !current.endsWith('\n') ? '\n\n' : '';
+    this.streamContent.set(current + separator + toAppend);
+    this.streamingConfig.set({ ...this.streamingConfig(), hasNextChunk: false });
+  }
+
+  /** 流式追加当前 demo 的内容（在已有内容后逐字追加） */
+  appendStreamingContent(): void {
+    const current = this.streamContent();
+    const toAppend = this.getCurrentFullContent();
+    const separator = current && !current.endsWith('\n') ? '\n\n' : '';
+    const fullContent = current + separator + toAppend;
+    this.charIndex = current.length + separator.length;
+    this.isStreaming.set(true);
+    this.streamingConfig.set({ ...this.streamingConfig(), hasNextChunk: true });
+    this.runStream(fullContent);
   }
 
   reset(): void {

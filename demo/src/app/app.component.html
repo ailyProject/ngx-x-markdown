@@ -45,6 +45,12 @@
         <button class="action-btn primary" (click)="startStreaming()" [disabled]="isStreaming()">
           {{ isStreaming() ? ' 输出中...' : ' 开始流式输出' }}
         </button>
+        <button class="action-btn" (click)="appendContent()" [disabled]="isStreaming()">
+          追加内容
+        </button>
+        <button class="action-btn" (click)="appendStreamingContent()" [disabled]="isStreaming()">
+          追加流式内容
+        </button>
         <button class="action-btn" (click)="reset()"> 重置</button>
       </div>
     </section>
@@ -75,7 +81,7 @@
       } @else {
         <div class="empty-state">
           <div class="empty-icon"></div>
-          <p>点击「开始流式输出」查看效果</p>
+          <p>点击「开始流式输出」或「追加内容」查看效果</p>
         </div>
       }
     </div>

@@ -480,6 +480,7 @@ import { CommonModule } from '@angular/common';
       line-height: 1.8;
       white-space: pre-wrap;
       border-top: 1px solid #f0f0f0;
+      word-wrap: break-word;
     }
 
     /* ====== aily-mermaid & mermaid ====== */

@@ -6,14 +6,15 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   ElementRef,
-  ViewContainerRef,
   ViewChild,
+  ViewContainerRef,
   OnDestroy,
   Type,
   Injector,
   ComponentRef,
   createComponent,
   EnvironmentInjector,
+  ApplicationRef,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -34,6 +35,9 @@ import type {
  * 已注入的动态组件的追踪记录
  * 通过 fingerprint 来判断是否可以复用，避免销毁/重建导致的闪烁
  */
+/** 组件视图的挂载方式 */
+type AttachMode = 'viewContainer' | 'appRef';
+
 interface InjectedEntry {
   /** 用于判断是否可复用的指纹（tagName + 关键属性 + 内容摘要） */
   fingerprint: string;
@@ -43,6 +47,8 @@ interface InjectedEntry {
   hostElement: HTMLElement;
   /** 上次注入时所用的标签名 */
   tagName: string;
+  /** 视图挂载方式，用于销毁时正确 detach */
+  attachMode?: AttachMode;
 }
 
 @Component({
@@ -118,6 +124,7 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
   private lastRenderedHtml: string = '';
 
   private cdr = inject(ChangeDetectorRef);
+  private appRef = inject(ApplicationRef);
   private viewContainerRef = inject(ViewContainerRef);
   private injector = inject(Injector);
   private envInjector = inject(EnvironmentInjector);
@@ -429,7 +436,10 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
     if (!this.components || Object.keys(this.components).length === 0) {
       for (const [, entries] of detachedMap) {
         for (const entry of entries) {
-          try { entry.componentRef.destroy(); } catch { /* ignore */ }
+          try {
+            this.detachComponentView(entry);
+            entry.componentRef.destroy();
+          } catch { /* ignore */ }
         }
       }
       // 同时销毁留在稳定区域的旧组件（components 配置已清除）
@@ -485,13 +495,13 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
             const hostElement = componentRef.location.nativeElement;
             element.parentNode?.replaceChild(hostElement, element);
 
-            this.viewContainerRef.insert(componentRef.hostView);
-
+            const mode = this.attachComponentView(componentRef);
             newEntries.push({
               fingerprint,
               componentRef,
               hostElement,
               tagName,
+              attachMode: mode,
             });
           } catch (e) {
             console.warn(`[ngx-x-markdown] Failed to inject component for <${tagName}>:`, e);
@@ -505,6 +515,7 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
       for (const entry of entries) {
         if (!reusedFingerprints.has(entry)) {
           try {
+            this.detachComponentView(entry);
             entry.componentRef.destroy();
           } catch {
             // ignore
@@ -541,12 +552,47 @@ export class XMarkdownComponent implements OnChanges, OnDestroy {
   private destroyInjectedComponents(): void {
     for (const entry of this.injectedEntries) {
       try {
+        this.detachComponentView(entry);
         entry.componentRef.destroy();
       } catch {
         // ignore
       }
     }
     this.injectedEntries = [];
+  }
+
+  /**
+   * 根据流式/非流式模式选择挂载方式：
+   * - 流式 (hasNextChunk): 使用 ViewContainerRef.insert，保证变更检测与视图层级正确
+   * - 非流式 (追加): 使用 ApplicationRef.attachView，避免组件被插入到 x-markdown 外部
+   */
+  private attachComponentView(componentRef: ComponentRef<any>): AttachMode {
+    const isStreaming = this.streaming?.hasNextChunk ?? false;
+    if (isStreaming) {
+      this.viewContainerRef.insert(componentRef.hostView);
+      return 'viewContainer';
+    }
+    this.appRef.attachView(componentRef.hostView);
+    return 'appRef';
+  }
+
+  private detachComponentView(entry: InjectedEntry): void {
+    const mode = entry.attachMode ?? 'appRef';
+    try {
+      if (mode === 'viewContainer') {
+        const idx = this.viewContainerRef.indexOf(entry.componentRef.hostView);
+        if (idx !== -1) this.viewContainerRef.remove(idx);
+      } else {
+        this.appRef.detachView(entry.componentRef.hostView);
+      }
+    } catch {
+      // 兼容旧数据或异常情况
+      try {
+        this.appRef.detachView(entry.componentRef.hostView);
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   // ===================== Scroll Preservation =====================
