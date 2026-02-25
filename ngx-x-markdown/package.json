@@ -4,7 +4,15 @@
   "description": "Angular port of @ant-design/x-markdown - Markdown renderer with streaming support",
   "license": "MIT",
   "author": {
-    "name": "ailyPriject"
+    "name": "ailyProject"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ailyProject/ngx-x-markdown"
+  },
+  "homepage": "https://github.com/ailyProject/ngx-x-markdown#readme",
+  "bugs": {
+    "url": "https://github.com/ailyProject/ngx-x-markdown/issues"
   },
   "peerDependencies": {
     "@angular/common": ">=17.0.0",
