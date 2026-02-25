@@ -1,8 +1,11 @@
 {
-  "name": "@anthropic/ngx-x-markdown",
-  "version": "1.0.0",
+  "name": "ngx-x-markdown",
+  "version": "0.0.1",
   "description": "Angular port of @ant-design/x-markdown - Markdown renderer with streaming support",
   "license": "MIT",
+  "author": {
+    "name": "ailyPriject"
+  },
   "peerDependencies": {
     "@angular/common": ">=17.0.0",
     "@angular/core": ">=17.0.0",
