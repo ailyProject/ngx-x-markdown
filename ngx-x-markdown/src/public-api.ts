@@ -2,6 +2,7 @@
 export { XMarkdownComponent } from './lib/components/x-markdown/x-markdown.component';
 export { AnimationTextComponent } from './lib/components/animation-text/animation-text.component';
 export { MermaidCodeComponent } from './lib/components/mermaid-code/mermaid-code.component';
+export { MERMAID_DARK_THEME } from './lib/constants/mermaid-themes';
 
 // Core
 export { MarkdownParser } from './lib/core/parser';

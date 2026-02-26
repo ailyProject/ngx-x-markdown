@@ -167,7 +167,7 @@ export class MermaidCodeComponent implements OnChanges, OnDestroy {
    */
   static setMermaidInstance(instance: any, config?: Record<string, any>): void {
     MermaidCodeComponent.mermaidInstance = instance;
-    if (instance && !MermaidCodeComponent.mermaidInitialized) {
+    if (instance) {
       instance.initialize({
         startOnLoad: false,
         ...config,
