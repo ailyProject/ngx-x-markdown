@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, signal, computed, ChangeDetectorRef, inject } from '@angular/core';
-import { XMarkdownComponent, MermaidCodeComponent } from 'ngx-x-markdown';
+import { XMarkdownComponent, MermaidCodeComponent, MERMAID_DARK_THEME } from 'ngx-x-markdown';
 import type { StreamingOption, ComponentMap } from 'ngx-x-markdown';
 import mermaid from 'mermaid';
 import { ChatCodeComponent } from './components/chat-code.component';
@@ -41,6 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private timer: ReturnType<typeof setInterval> | null = null;
   private charIndex = 0;
+  private cdr = inject(ChangeDetectorRef);
 
   // ========== Predefined demo contents ==========
   readonly demoContents: { label: string; value: string }[] = [
@@ -81,6 +82,21 @@ export class AppComponent implements OnInit, OnDestroy {
     const next = this.theme() === 'light' ? 'dark' : 'light';
     this.theme.set(next);
     document.body.classList.toggle('dark-mode', next === 'dark');
+
+    // 更新 Mermaid 主题并触发重新渲染
+    const config = next === 'dark' ? MERMAID_DARK_THEME : { theme: 'default' };
+    MermaidCodeComponent.setMermaidInstance(mermaid, config);
+    ChatCodeComponent.setMermaidInstance(mermaid, config);
+
+    const content = this.streamContent();
+    if (content) {
+      this.streamContent.set('');
+      this.cdr.detectChanges();
+      queueMicrotask(() => {
+        this.streamContent.set(content);
+        this.cdr.detectChanges();
+      });
+    }
   }
 
   selectDemo(index: number): void {
@@ -139,9 +155,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // 全局初始化一次 mermaid 实例
-    MermaidCodeComponent.setMermaidInstance(mermaid, { theme: 'default' });
-    ChatCodeComponent.setMermaidInstance(mermaid, { theme: 'default' });
+    // 全局初始化 mermaid 实例，根据当前主题选择配置
+    const config = this.theme() === 'dark' ? MERMAID_DARK_THEME : { theme: 'default' };
+    MermaidCodeComponent.setMermaidInstance(mermaid, config);
+    ChatCodeComponent.setMermaidInstance(mermaid, config);
   }
 
   ngOnDestroy(): void {

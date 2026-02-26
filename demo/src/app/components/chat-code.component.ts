@@ -743,7 +743,7 @@ export class ChatCodeComponent implements OnChanges, OnDestroy {
 
   static setMermaidInstance(instance: any, config?: Record<string, any>): void {
     ChatCodeComponent.mermaidInstance = instance;
-    if (instance && !ChatCodeComponent.mermaidInitialized) {
+    if (instance) {
       instance.initialize({ startOnLoad: false, ...config });
       ChatCodeComponent.mermaidInitialized = true;
     }

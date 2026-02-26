@@ -1,6 +1,6 @@
 {
   "name": "ngx-x-markdown",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Angular port of @ant-design/x-markdown - Markdown renderer with streaming support",
   "license": "MIT",
   "author": {
@@ -40,7 +40,5 @@
   "scripts": {
     "build": "ng-packagr -p ng-package.json"
   },
-  "main": "src/public-api.ts",
-  "module": "src/public-api.ts",
-  "typings": "src/public-api.ts"
+  "main": "fesm2022/ngx-x-markdown.mjs"
 }
